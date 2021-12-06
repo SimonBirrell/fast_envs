@@ -1,0 +1,6 @@
+from fast_envs.envs.fast_ant_env import FastAntEnv
+from fast_envs.envs.fast_ant_friction_env import FastAntFrictionEnv
+from fast_envs.envs.fast_half_cheetah_env import FastHalfCheetahEnv
+from fast_envs.envs.fast_humanoid_standup_env import FastHumanoidStandupEnv
+from fast_envs.envs.mass_spring_damper_env import MassSpringDamperEnv
+from fast_envs.envs.hopping_mass_spring_damper_env import HoppingMassSpringDamperEnv
