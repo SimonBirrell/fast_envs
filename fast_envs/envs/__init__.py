@@ -4,3 +4,7 @@ from fast_envs.envs.fast_half_cheetah_env import FastHalfCheetahEnv
 from fast_envs.envs.fast_humanoid_standup_env import FastHumanoidStandupEnv
 from fast_envs.envs.mass_spring_damper_env import MassSpringDamperEnv
 from fast_envs.envs.hopping_mass_spring_damper_env import HoppingMassSpringDamperEnv
+from fast_envs.envs.hopping_mass_spring_damper_pertubations_env import HoppingMassSpringDamperPertubationsEnv
+from fast_envs.envs.three_masses_two_springs_env import ThreeMassTwoSpringsEnv
+from fast_envs.envs.two_masses_one_spring_env import TwoMassOneSpringsEnv
+from fast_envs.envs.fast_env_multipendulum import MultipendulumEnv

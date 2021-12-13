@@ -6,12 +6,20 @@ from gym.envs.classic_control import rendering
 
 import numpy as np
 
-class HoppingMassSpringDamperEnv(gym.Env):
+class HoppingMassSpringDamperPertubationsEnv(gym.Env):
 	metadata = {
         'render.modes': ['human', 'rgb_array'],
         'video.frames_per_second' : 50
     }
-	def __init__(self, n_cycles=20, y0=0.50, y_dot0=0.0, phase0='stance', warnings=True): 
+	def __init__(
+		self, 
+		n_cycles=20, 
+		y0=0.50, 
+		y_dot0=0.0, 
+		phase0='stance', 
+		warnings=True,
+		get_pertubations=None
+		): 
 
 		# Physics constants
 		self.sim_m = 0.5 	# mass (kg)
@@ -40,6 +48,11 @@ class HoppingMassSpringDamperEnv(gym.Env):
 		self.x_threshold = 4.8
 		self.obs_high = np.array([self.x_threshold, np.finfo(np.float32).max])
 
+		# External forces
+		self.get_pertubations = get_pertubations
+		print("-------------get_pertubations-------")
+		print(get_pertubations)
+
 		# Gym stuff
 		self.observation_space = spaces.Box(-np.float32(self.obs_high), np.float32(self.obs_high), dtype=np.float32)
 		self.action_space = spaces.Box(-np.float32(self.max_force), np.float32(self.max_force), dtype=np.float32)
@@ -58,6 +71,8 @@ class HoppingMassSpringDamperEnv(gym.Env):
 		self.sim_y = self.y0
 		self.sim_y_dot = self.y_dot0
 		self.sim_phase = self.phase0
+		self.pertubations = 0.0
+		self.sim_t = 0
 		return self._get_state()
 
 	def step(self, action):
@@ -70,6 +85,7 @@ class HoppingMassSpringDamperEnv(gym.Env):
 		c = self.sim_c
 		y = self.sim_y
 		y_dot = self.sim_y_dot
+		p = self.pertubations
 		dt = self.sim_dt
 		info = {'phase': self.sim_phase, 'phase_change': 0}
 		if not self.action_space.contains(action):
@@ -81,11 +97,14 @@ class HoppingMassSpringDamperEnv(gym.Env):
 		if self.sim_y is None or self.sim_y_dot is None or self.sim_phase is None:
 			raise("Must call env.reset() before env.step()")
 
+		p = 0.0 if self.get_pertubations is None else self.get_pertubations(self.sim_t)
+		info['p'] = p
+
 		for t in range(self.n_cycles):
 			if self.sim_phase == 'stance':
-				y_dot_dot = -(y-L0)*k/m - g + f/m - (c/m)*y_dot
+				y_dot_dot = -(y-L0)*k/m - g + f/m - (c/m)*y_dot + p/m
 			elif self.sim_phase == 'flight':
-				y_dot_dot = -g + f/m
+				y_dot_dot = -g + f/m + p/m
 
 			# Euler Method
 			y_dot = y_dot + y_dot_dot * dt
@@ -104,6 +123,7 @@ class HoppingMassSpringDamperEnv(gym.Env):
 		self.sim_y_dot = y_dot	
 		reward = 0
 		done = False
+		self.sim_t = self.sim_t + 1
 		#print("y",y,"phase",self.sim_phase, "y..", y_dot_dot)
  
 		return self._get_state(), reward, done, info
